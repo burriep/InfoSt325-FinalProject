@@ -1,1 +1,1 @@
-# InfoSt-325-FinalProject
+# InfoSt 325 - Final Project
