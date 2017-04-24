@@ -1,12 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.uwm.infost325;
 
 /**
- *
  * @author zach
  */
 public class BasicCryptGUI extends javax.swing.JFrame {
@@ -280,6 +274,6 @@ public class BasicCryptGUI extends javax.swing.JFrame {
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
-    // End of variables declaration//GEN-END:variables
+	private javax.swing.JTextField jTextField3;
+	// End of variables declaration//GEN-END:variables
 }
