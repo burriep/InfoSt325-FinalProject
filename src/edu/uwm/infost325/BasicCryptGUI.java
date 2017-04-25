@@ -297,11 +297,11 @@ public class BasicCryptGUI extends javax.swing.JFrame {
 
     private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
         //Exits the program
-        
         System.exit(0);
     }//GEN-LAST:event_exitBtnActionPerformed
 
     private void aboutBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutBtnActionPerformed
+            //Opens the about frame
             JFrame frame = new aboutGUI();
             frame.setTitle("Cryptology About");
             frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
