@@ -17,7 +17,7 @@ public class CryptController {
 	// max value (22 characters, last one must be A-D): /////////////////////3
 	// use the Base64.Decoder class as needed to convert to byte[]
 
-	public void encrypt(File input, File output, byte[] raw_key) {
+	public static void encrypt(File input, File output, byte[] raw_key, AsyncController controller) {
 		try {
 			SecretKeySpec key = new SecretKeySpec(raw_key, "AES");
 			// Create Cipher
@@ -30,10 +30,11 @@ public class CryptController {
 			aesCipher.init(Cipher.ENCRYPT_MODE, key, ivParamSpec);
 			try (InputStream fis = new BufferedInputStream(new FileInputStream(input))) {
 				try (OutputStream fos = new BufferedOutputStream(new FileOutputStream(output))) {
+					controller.setMaxProgress(input.length());
 					// write the IV to the output file
 					fos.write(iv);
 					// write the encrypted file to the output file
-					crypt(fis, fos, aesCipher);
+					crypt(fis, fos, aesCipher, controller);
 				}
 			}
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException
@@ -46,7 +47,7 @@ public class CryptController {
 		}
 	}
 
-	public void decrypt(File input, File output, byte[] raw_key) {
+	public static void decrypt(File input, File output, byte[] raw_key, AsyncController controller) {
 		try {
 			SecretKeySpec key = new SecretKeySpec(raw_key, "AES");
 			// Create Cipher
@@ -55,13 +56,14 @@ public class CryptController {
 			byte[] iv = new byte[16]; // 128 bit IV
 			// setup file input stream
 			try (InputStream fis = new BufferedInputStream(new FileInputStream(input))) {
+				controller.setMaxProgress(input.length());
 				// read in IV
 				fis.read(iv);
 				IvParameterSpec ivParamSpec = new IvParameterSpec(iv);
 				// Initialize Cipher with key and parameters
 				aesCipher.init(Cipher.DECRYPT_MODE, key, ivParamSpec);
 				try (OutputStream fos = new BufferedOutputStream(new FileOutputStream(output))) {
-					crypt(fis, fos, aesCipher);
+					crypt(fis, fos, aesCipher, controller);
 				}
 			}
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException
@@ -74,11 +76,14 @@ public class CryptController {
 		}
 	}
 
-	private static void crypt(InputStream fis, OutputStream fos, Cipher cipher)
+	private static void crypt(InputStream fis, OutputStream fos, Cipher cipher, AsyncController controller)
 			throws FileNotFoundException, IOException, IllegalBlockSizeException, BadPaddingException {
 		byte[] buffer = new byte[512];
+		int totalBytesRead = 0;
 		int bytesRead = 0;
 		while ((bytesRead = fis.read(buffer)) > 0) {
+			totalBytesRead += bytesRead;
+			controller.setProgress(totalBytesRead);
 			byte[] ciphertext = cipher.update(buffer, 0, bytesRead);
 			if (ciphertext != null) {
 				fos.write(ciphertext);
@@ -88,6 +93,7 @@ public class CryptController {
 		if (ciphertext != null) {
 			fos.write(ciphertext);
 		}
+		controller.setDone();
 	}
 
 }
