@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -33,10 +34,7 @@ public class BasicCryptGUI extends javax.swing.JFrame {
         //Creates the file choosers
         sourceLocation = new JFileChooser();
         destLocation = new JFileChooser();
-        JFrame frame = new initialPass();
-        frame.setTitle("Cryptology");
-        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-	frame.setVisible(true);
+
     }
 
     /**
@@ -331,9 +329,53 @@ public class BasicCryptGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_sourceFilePathVisActionPerformed
 
     private void encryptBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_encryptBtnActionPerformed
+
+        if (selectedFile != null && destFile != null)
+        {
+        JFrame frame = new JFrame();
+        String result = JOptionPane.showInputDialog(frame, "Enter a password using A-Z, a-z, /, + with the last letter A-D and a max length of 22 characters ");
+        byte [] passB;
+       
+            if (result.length() <= 22 && result.length() >= 1) 
+            {
+                if (result.matches("[A-Za-z0-9/+]+"))
+                {
+                    char passwordLast = result.charAt(result.length() - 1);
+
+                    if (passwordLast == 'A' || passwordLast == 'B' || passwordLast == 'C')
+                    {
+
+                        passB = result.getBytes();
+                        System.out.println(passB);
+                        //CryptController.encrypt(selectedFile, destFile, (this)passB);
+                    }
+                    else 
+                    {
+                    JFrame parent = new JFrame();
+                    JOptionPane.showMessageDialog(parent, "The format is incorrect, please enter it again.");
+                    }
+                }
+                else 
+                {
+                JFrame parent = new JFrame();
+                JOptionPane.showMessageDialog(parent, "The format is incorrect, please enter it again.");
+                }
+            } 
+            else 
+            {
+                JFrame parent = new JFrame();
+                JOptionPane.showMessageDialog(parent, "The format is incorrect, please enter it again.");
+            }
+        }
+        else
+        {
+            JFrame warning = new JFrame();
+            JOptionPane.showMessageDialog(warning, "You are missing directories!");
+        }
+        //http://www.java2s.com/Tutorial/Java/0240__Swing/InputPopUps.htm
         
-        //Calls the encrypt class in CrpytController
-        //CryptController.encrypt(selectedFile, destFile);
+      
+
     }//GEN-LAST:event_encryptBtnActionPerformed
 
     private void clearBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearBtnActionPerformed
@@ -348,8 +390,48 @@ public class BasicCryptGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_clearBtnActionPerformed
 
     private void decryptbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_decryptbtnActionPerformed
-        //Calls the decrypt class in CryptController
-        //CryptController.decrypt(selectedFile, destFile);
+
+    
+    if (selectedFile != null && destFile != null)
+    {
+        JFrame frame = new JFrame();
+        String resultD = JOptionPane.showInputDialog(frame, "Enter a password using A-Z, a-z, /, + with the last letter A-D and a max length of 22 characters ");    
+        
+        if (resultD.length() <= 22 && resultD.length() >= 1) 
+        {
+            if (resultD.matches("[A-Za-z0-9/+]+"))
+            {
+                char passwordLast = resultD.charAt(resultD.length() - 1);
+                
+                if (passwordLast == 'A' || passwordLast == 'B' || passwordLast == 'C')
+                {
+                    //CryptController.decrypt(selectedFile, destFile, (this)passB);
+                }
+                else 
+                {
+                JFrame parent = new JFrame();
+                JOptionPane.showMessageDialog(parent, "The format is incorrect, please enter it again.");
+                }
+            }
+            else 
+            {
+            JFrame parent = new JFrame();
+            JOptionPane.showMessageDialog(parent, "The format is incorrect, please enter it again.");
+            }
+        } 
+        else 
+        {
+            JFrame parent = new JFrame();
+            JOptionPane.showMessageDialog(parent, "The format is incorrect, please enter it again.");
+        }
+    }
+    else
+    {
+            JFrame warning = new JFrame();
+            JOptionPane.showMessageDialog(warning, "You are missing directories!");        
+    }
+        //http://www.java2s.com/Tutorial/Java/0240__Swing/InputPopUps.htm
+
     }//GEN-LAST:event_decryptbtnActionPerformed
 
     private void hashFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hashFileActionPerformed
