@@ -7,6 +7,11 @@ import javax.swing.*;
  * @author zach
  */
 public class aboutGUI extends JFrame {
+	/**
+	 * Keep Eclipse Happy
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public aboutGUI() {
 		this.setTitle("About Cryptology");
 		this.setVisible(true);
