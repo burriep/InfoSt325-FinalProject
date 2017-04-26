@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -19,16 +20,21 @@ public class BasicCryptGUI extends javax.swing.JFrame {
     /**
      * Creates new form BasicCrpytGUI
      */
-    
+    //Creates the file chooser objects
     private final JFileChooser sourceLocation;
     private final JFileChooser destLocation;
     
+    //Creates the file objects
+    public File destFile;
+    public File selectedFile;
+
     public BasicCryptGUI() {
         initComponents();
         
         //Creates the file choosers
         sourceLocation = new JFileChooser();
         destLocation = new JFileChooser();
+        
     }
 
     /**
@@ -117,6 +123,11 @@ public class BasicCryptGUI extends javax.swing.JFrame {
         );
 
         hashFile.setText("Hash File");
+        hashFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                hashFileActionPerformed(evt);
+            }
+        });
 
         hashVis.setEditable(false);
 
@@ -153,6 +164,11 @@ public class BasicCryptGUI extends javax.swing.JFrame {
         });
 
         decryptbtn.setText("Decrypt");
+        decryptbtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                decryptbtnActionPerformed(evt);
+            }
+        });
 
         cancelBtn.setText("Cancel");
         cancelBtn.setMaximumSize(new java.awt.Dimension(93, 29));
@@ -262,18 +278,18 @@ public class BasicCryptGUI extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
+    
     private void destinationLocActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_destinationLocActionPerformed
             //Provides a value for the results of the dialogue box           
         int returnVal = destLocation.showSaveDialog(this);
-            
+           
         //Runs conditional if the user selects a destination
             if (returnVal == JFileChooser.APPROVE_OPTION)
             {
                 
                 //Places the directory in destFile and changes the textbox
                 //to the directory path                
-                File destFile = destLocation.getSelectedFile(); 
+                this.destFile = destLocation.getSelectedFile(); 
                 destFilePathVis.setText(destFile.toString());
                 
             }
@@ -285,11 +301,10 @@ public class BasicCryptGUI extends javax.swing.JFrame {
             
             //Runs conditional if the user selects a file
             if (returnVal == JFileChooser.APPROVE_OPTION)
-            {
-                
+            {   
                 //Places the directory in selectedFile and changes the textbox
                 //to the directory path
-                File selectedFile = sourceLocation.getSelectedFile(); 
+                this.selectedFile = sourceLocation.getSelectedFile(); 
                 sourceFilePathVis.setText(selectedFile.toString());
                 
             }
@@ -314,17 +329,110 @@ public class BasicCryptGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_sourceFilePathVisActionPerformed
 
     private void encryptBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_encryptBtnActionPerformed
-        // TODO add your handling code here:
+        if (selectedFile != null && destFile != null)
+        {
+        JFrame frame = new JFrame();
+        String result = JOptionPane.showInputDialog(frame, "Enter a password using A-Z, a-z, /, + with the last letter A-D and a max length of 22 characters ");
+        byte [] passB;
+       
+            if (result.length() <= 22 && result.length() >= 1) 
+            {
+                if (result.matches("[A-Za-z0-9/+]+"))
+                {
+                    char passwordLast = result.charAt(result.length() - 1);
+
+                    if (passwordLast == 'A' || passwordLast == 'B' || passwordLast == 'C')
+                    {
+
+                        passB = result.getBytes();
+                        System.out.println(passB);
+                        //CryptController.encrypt(selectedFile, destFile, (this)passB);
+                    }
+                    else 
+                    {
+                    JFrame parent = new JFrame();
+                    JOptionPane.showMessageDialog(parent, "The format is incorrect, please enter it again.");
+                    }
+                }
+                else 
+                {
+                JFrame parent = new JFrame();
+                JOptionPane.showMessageDialog(parent, "The format is incorrect, please enter it again.");
+                }
+            } 
+            else 
+            {
+                JFrame parent = new JFrame();
+                JOptionPane.showMessageDialog(parent, "The format is incorrect, please enter it again.");
+            }
+        }
+        else
+        {
+            JFrame warning = new JFrame();
+            JOptionPane.showMessageDialog(warning, "You are missing directories!");
+        }
+        //http://www.java2s.com/Tutorial/Java/0240__Swing/InputPopUps.htm
+        
+      
     }//GEN-LAST:event_encryptBtnActionPerformed
 
     private void clearBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearBtnActionPerformed
         //Resets text fields
-        destFilePathVis.setText("Destintation File Path");
+        destFilePathVis.setText("Destination File Path");
         sourceFilePathVis.setText("Source File Path");
+        hashVis.setText("");
         
         //Resets File variables
-        
+        this.selectedFile = null;
+        this.destFile = null;
     }//GEN-LAST:event_clearBtnActionPerformed
+
+    private void decryptbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_decryptbtnActionPerformed
+    
+    if (selectedFile != null && destFile != null)
+    {
+        JFrame frame = new JFrame();
+        String resultD = JOptionPane.showInputDialog(frame, "Enter a password using A-Z, a-z, /, + with the last letter A-D and a max length of 22 characters ");    
+        
+        if (resultD.length() <= 22 && resultD.length() >= 1) 
+        {
+            if (resultD.matches("[A-Za-z0-9/+]+"))
+            {
+                char passwordLast = resultD.charAt(resultD.length() - 1);
+                
+                if (passwordLast == 'A' || passwordLast == 'B' || passwordLast == 'C')
+                {
+                    //CryptController.decrypt(selectedFile, destFile, (this)passB);
+                }
+                else 
+                {
+                JFrame parent = new JFrame();
+                JOptionPane.showMessageDialog(parent, "The format is incorrect, please enter it again.");
+                }
+            }
+            else 
+            {
+            JFrame parent = new JFrame();
+            JOptionPane.showMessageDialog(parent, "The format is incorrect, please enter it again.");
+            }
+        } 
+        else 
+        {
+            JFrame parent = new JFrame();
+            JOptionPane.showMessageDialog(parent, "The format is incorrect, please enter it again.");
+        }
+    }
+    else
+    {
+            JFrame warning = new JFrame();
+            JOptionPane.showMessageDialog(warning, "You are missing directories!");        
+    }
+        //http://www.java2s.com/Tutorial/Java/0240__Swing/InputPopUps.htm
+    }//GEN-LAST:event_decryptbtnActionPerformed
+
+    private void hashFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hashFileActionPerformed
+        //Hash.
+    }//GEN-LAST:event_hashFileActionPerformed
 
     /**
      * @param args the command line arguments
@@ -357,6 +465,8 @@ public class BasicCryptGUI extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
+                
+                //Disaplys the GUI
                 new BasicCryptGUI().setVisible(true);
             }
         });
