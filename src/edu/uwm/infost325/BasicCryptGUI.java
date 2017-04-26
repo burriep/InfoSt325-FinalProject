@@ -40,6 +40,8 @@ public class BasicCryptGUI extends JFrame {
 	private JButton aboutBtn;
 	private JButton exitBtn;
 	private JProgressBar progressBar;
+	
+	private AsyncController fileController;
 
 	public BasicCryptGUI() {
 		initComponents();
@@ -47,6 +49,7 @@ public class BasicCryptGUI extends JFrame {
 		// Creates the file choosers
 		sourceLocation = new JFileChooser();
 		destLocation = new JFileChooser();
+		fileController = new AsyncFileController();
 	}
 
 	private void initComponents() {
@@ -313,6 +316,59 @@ public class BasicCryptGUI extends JFrame {
 
 	private boolean isValidKey(String key) {
 		return key != null && key.matches("^(?:[A-Za-z0-9/+]){21}?[A-D]$");
+	}
+
+	private class AsyncFileController extends AsyncController {
+		long maxProgress;
+		long currentProgress;
+		boolean done;
+		boolean canceled;
+
+		/* Runs in GUI thread */
+		@Override
+		public void cancel() {
+			canceled = true;
+		}
+
+		/* Runs in background thread */
+		@Override
+		public boolean isCanceled() {
+			return canceled;
+		}
+
+		/* Runs in background thread */
+		@Override
+		public void setMaxProgress(long max) {
+			if (max > 0)
+				maxProgress = max;
+		}
+
+		/* Runs in background thread */
+		@Override
+		public void setProgress(long progress) {
+			if (progress > 0)
+				currentProgress = progress;
+			this.setChanged();
+			this.notifyObservers();
+		}
+
+		/* Runs in GUI thread */
+		@Override
+		public double getProgress() {
+			return (maxProgress > 0) ? (currentProgress * 1.0 / maxProgress) : 0;
+		}
+
+		/* Runs in background thread */
+		@Override
+		public void setDone() {
+			done = true;
+		}
+
+		/* Runs in GUI thread */
+		@Override
+		public boolean isDone() {
+			return done;
+		}
 	}
 
 	public static void main(String args[]) {
