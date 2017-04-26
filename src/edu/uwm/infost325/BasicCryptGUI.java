@@ -34,7 +34,7 @@ public class BasicCryptGUI extends javax.swing.JFrame {
         //Creates the file choosers
         sourceLocation = new JFileChooser();
         destLocation = new JFileChooser();
-        
+
     }
 
     /**
@@ -329,6 +329,7 @@ public class BasicCryptGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_sourceFilePathVisActionPerformed
 
     private void encryptBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_encryptBtnActionPerformed
+
         if (selectedFile != null && destFile != null)
         {
         JFrame frame = new JFrame();
@@ -374,6 +375,7 @@ public class BasicCryptGUI extends javax.swing.JFrame {
         //http://www.java2s.com/Tutorial/Java/0240__Swing/InputPopUps.htm
         
       
+
     }//GEN-LAST:event_encryptBtnActionPerformed
 
     private void clearBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearBtnActionPerformed
@@ -388,6 +390,7 @@ public class BasicCryptGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_clearBtnActionPerformed
 
     private void decryptbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_decryptbtnActionPerformed
+
     
     if (selectedFile != null && destFile != null)
     {
@@ -428,6 +431,7 @@ public class BasicCryptGUI extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(warning, "You are missing directories!");        
     }
         //http://www.java2s.com/Tutorial/Java/0240__Swing/InputPopUps.htm
+
     }//GEN-LAST:event_decryptbtnActionPerformed
 
     private void hashFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hashFileActionPerformed
