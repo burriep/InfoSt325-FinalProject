@@ -273,12 +273,15 @@ public class BasicCryptGUI extends JFrame {
 
 	private void doEncryptFile(ActionEvent evt) {
 		if (sourceFile != null && destinationFile != null) {
-			String result = JOptionPane.showInputDialog(this, KEY_REQUIREMENTS_DESCRIPTION);
-			if (isValidKey(result)) {
-				// TODO: encrypt file
-			} else {
-				JOptionPane.showMessageDialog(this, "Invalid key, please try again.");
-			}
+			String result = null;
+			do {
+				result = JOptionPane.showInputDialog(this, KEY_REQUIREMENTS_DESCRIPTION);
+				if (isValidKey(result)) {
+					// TODO: encrypt file
+				} else if (result != null) {
+					JOptionPane.showMessageDialog(this, "Invalid key, please try again.");
+				}
+			} while (result != null && !isValidKey(result));
 		} else {
 			JOptionPane.showMessageDialog(this, "Please select a source and destination file.");
 		}
@@ -286,12 +289,15 @@ public class BasicCryptGUI extends JFrame {
 
 	private void doDecryptFile(ActionEvent evt) {
 		if (sourceFile != null && destinationFile != null) {
-			String resultD = JOptionPane.showInputDialog(this, KEY_REQUIREMENTS_DESCRIPTION);
-			if (isValidKey(resultD)) {
-				// TODO: decrypt file
-			} else {
-				JOptionPane.showMessageDialog(this, "Invalid key, please try again.");
-			}
+			String result = null;
+			do {
+				result = JOptionPane.showInputDialog(this, KEY_REQUIREMENTS_DESCRIPTION);
+				if (isValidKey(result)) {
+					// TODO: decrypt file
+				} else if (result != null) {
+					JOptionPane.showMessageDialog(this, "Invalid key, please try again.");
+				}
+			} while (result != null && !isValidKey(result));
 		} else {
 			JOptionPane.showMessageDialog(this, "Please select a source and destination file.");
 		}
