@@ -6,9 +6,9 @@ import javax.crypto.*;
 import javax.crypto.spec.*;
 
 /**
- * @author Paul Burrie
- * Some of this functionality is based off work I did in my cyber security lab in a previous semester,
- * but it needed to be customized to fit the needs of this project.
+ * @author Paul Burrie Some of this functionality is based off work I did in my
+ *         cyber security lab in a previous semester, but it needed to be
+ *         customized to fit the needs of this project.
  */
 public class CryptController {
 
@@ -81,7 +81,7 @@ public class CryptController {
 		byte[] buffer = new byte[512];
 		int totalBytesRead = 0;
 		int bytesRead = 0;
-		while ((bytesRead = fis.read(buffer)) > 0) {
+		while (!controller.isCanceled() && (bytesRead = fis.read(buffer)) > 0) {
 			totalBytesRead += bytesRead;
 			controller.setProgress(totalBytesRead);
 			byte[] ciphertext = cipher.update(buffer, 0, bytesRead);
@@ -89,11 +89,13 @@ public class CryptController {
 				fos.write(ciphertext);
 			}
 		}
-		byte[] ciphertext = cipher.doFinal();
-		if (ciphertext != null) {
-			fos.write(ciphertext);
+		if (!controller.isCanceled()) {
+			byte[] ciphertext = cipher.doFinal();
+			if (ciphertext != null) {
+				fos.write(ciphertext);
+			}
+			controller.setDone();
 		}
-		controller.setDone();
 	}
 
 }
