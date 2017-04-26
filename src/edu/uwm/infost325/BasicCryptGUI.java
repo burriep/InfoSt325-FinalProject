@@ -6,7 +6,6 @@
 package edu.uwm.infost325;
 
 import java.io.File;
-import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 
@@ -19,9 +18,13 @@ public class BasicCryptGUI extends javax.swing.JFrame {
     /**
      * Creates new form BasicCrpytGUI
      */
-    
+    //Creates the file chooser objects
     private final JFileChooser sourceLocation;
     private final JFileChooser destLocation;
+    
+    //Creates the file objects
+    public File destFile;
+    public File selectedFile;
     
     public BasicCryptGUI() {
         initComponents();
@@ -29,6 +32,12 @@ public class BasicCryptGUI extends javax.swing.JFrame {
         //Creates the file choosers
         sourceLocation = new JFileChooser();
         destLocation = new JFileChooser();
+
+        JFrame frame = new initialPass();
+        frame.setTitle("Cryptology");
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+	frame.setVisible(true);
+        
     }
 
     /**
@@ -117,6 +126,11 @@ public class BasicCryptGUI extends javax.swing.JFrame {
         );
 
         hashFile.setText("Hash File");
+        hashFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                hashFileActionPerformed(evt);
+            }
+        });
 
         hashVis.setEditable(false);
 
@@ -153,6 +167,11 @@ public class BasicCryptGUI extends javax.swing.JFrame {
         });
 
         decryptbtn.setText("Decrypt");
+        decryptbtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                decryptbtnActionPerformed(evt);
+            }
+        });
 
         cancelBtn.setText("Cancel");
         cancelBtn.setMaximumSize(new java.awt.Dimension(93, 29));
@@ -262,18 +281,18 @@ public class BasicCryptGUI extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
+    
     private void destinationLocActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_destinationLocActionPerformed
             //Provides a value for the results of the dialogue box           
         int returnVal = destLocation.showSaveDialog(this);
-            
+           
         //Runs conditional if the user selects a destination
             if (returnVal == JFileChooser.APPROVE_OPTION)
             {
                 
                 //Places the directory in destFile and changes the textbox
                 //to the directory path                
-                File destFile = destLocation.getSelectedFile(); 
+                this.destFile = destLocation.getSelectedFile(); 
                 destFilePathVis.setText(destFile.toString());
                 
             }
@@ -285,11 +304,10 @@ public class BasicCryptGUI extends javax.swing.JFrame {
             
             //Runs conditional if the user selects a file
             if (returnVal == JFileChooser.APPROVE_OPTION)
-            {
-                
+            {   
                 //Places the directory in selectedFile and changes the textbox
                 //to the directory path
-                File selectedFile = sourceLocation.getSelectedFile(); 
+                this.selectedFile = sourceLocation.getSelectedFile(); 
                 sourceFilePathVis.setText(selectedFile.toString());
                 
             }
@@ -314,17 +332,30 @@ public class BasicCryptGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_sourceFilePathVisActionPerformed
 
     private void encryptBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_encryptBtnActionPerformed
-        // TODO add your handling code here:
+        
+        //Calls the encrypt class in CrpytController
+        //CryptController.encrypt(selectedFile, destFile);
     }//GEN-LAST:event_encryptBtnActionPerformed
 
     private void clearBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearBtnActionPerformed
         //Resets text fields
-        destFilePathVis.setText("Destintation File Path");
+        destFilePathVis.setText("Destination File Path");
         sourceFilePathVis.setText("Source File Path");
+        hashVis.setText("");
         
         //Resets File variables
-        
+        this.selectedFile = null;
+        this.destFile = null;
     }//GEN-LAST:event_clearBtnActionPerformed
+
+    private void decryptbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_decryptbtnActionPerformed
+        //Calls the decrypt class in CryptController
+        //CryptController.decrypt(selectedFile, destFile);
+    }//GEN-LAST:event_decryptbtnActionPerformed
+
+    private void hashFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hashFileActionPerformed
+        //Hash.
+    }//GEN-LAST:event_hashFileActionPerformed
 
     /**
      * @param args the command line arguments
@@ -357,6 +388,8 @@ public class BasicCryptGUI extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
+                
+                //Disaplys the GUI
                 new BasicCryptGUI().setVisible(true);
             }
         });
