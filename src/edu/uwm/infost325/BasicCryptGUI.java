@@ -1,6 +1,7 @@
 /*
  * Sources referenced (besides the Java language reference)
  * http://www.java2s.com/Tutorial/Java/0240__Swing/InputPopUps.htm
+ * https://docs.oracle.com/javase/tutorial/uiswing/concurrency/worker.html
  */
 package edu.uwm.infost325;
 
@@ -21,7 +22,7 @@ public class BasicCryptGUI extends JFrame {
 	private final JFileChooser sourceLocation;
 	private final JFileChooser destLocation;
 	
-	private final String KEY_REQUIREMENTS_DESCRIPTION = "Enter a 22 character key meeting the following requirements:\nValid characters: A-Z, a-z, /, + (not the comma character)\nThe last letter must be A, B, C, or D.";
+	private final String KEY_REQUIREMENTS_DESCRIPTION = "Enter a 22 character key meeting the following requirements:\nValid characters: A-Z, a-z, /, + (not the comma character)\nThe last letter must be A, Q, g, or w.";
 
 	// Creates the file objects
 	public File destinationFile;
@@ -40,8 +41,9 @@ public class BasicCryptGUI extends JFrame {
 	private JButton aboutBtn;
 	private JButton exitBtn;
 	private JProgressBar progressBar;
-	
-	private AsyncController fileController;
+
+	private CryptController cryptController;
+	FileReporter reporter;
 
 	public BasicCryptGUI() {
 		initComponents();
@@ -49,7 +51,7 @@ public class BasicCryptGUI extends JFrame {
 		// Creates the file choosers
 		sourceLocation = new JFileChooser();
 		destLocation = new JFileChooser();
-		fileController = new AsyncFileController();
+		reporter = new FileReporter();
 	}
 
 	private void initComponents() {
@@ -147,6 +149,7 @@ public class BasicCryptGUI extends JFrame {
 		cancelBtn.setMaximumSize(new Dimension(93, 29));
 		cancelBtn.setMinimumSize(new Dimension(93, 29));
 		cancelBtn.setPreferredSize(new Dimension(93, 29));
+		cancelBtn.setEnabled(false);
 
 		clearBtn.setText("Clear");
 		clearBtn.setMaximumSize(new Dimension(93, 29));
@@ -275,34 +278,36 @@ public class BasicCryptGUI extends JFrame {
 	}
 
 	private void doEncryptFile(ActionEvent evt) {
-		if (sourceFile != null && destinationFile != null) {
-			String result = null;
-			do {
-				result = JOptionPane.showInputDialog(this, KEY_REQUIREMENTS_DESCRIPTION);
-				if (isValidKey(result)) {
-					// TODO: encrypt file
-				} else if (result != null) {
-					JOptionPane.showMessageDialog(this, "Invalid key, please try again.");
+		byte[] key = getKey();
+		if (key != null) {
+			disableButtons();
+			cryptController = new CryptController(sourceFile, destinationFile, key, true, reporter);
+			cryptController.execute();
+			// update the progress bar
+			cryptController.addPropertyChangeListener((pce) -> {
+				if (pce.getPropertyName().equals("progress")) {
+					int progress = (Integer) pce.getNewValue();
+					progressBar.setValue(progress);
 				}
-			} while (result != null && !isValidKey(result));
-		} else {
-			JOptionPane.showMessageDialog(this, "Please select a source and destination file.");
+			});
+			// TODO: remove property change listener after the task is done
 		}
 	}
 
 	private void doDecryptFile(ActionEvent evt) {
-		if (sourceFile != null && destinationFile != null) {
-			String result = null;
-			do {
-				result = JOptionPane.showInputDialog(this, KEY_REQUIREMENTS_DESCRIPTION);
-				if (isValidKey(result)) {
-					// TODO: decrypt file
-				} else if (result != null) {
-					JOptionPane.showMessageDialog(this, "Invalid key, please try again.");
+		byte[] key = getKey();
+		if (key != null) {
+			disableButtons();
+			cryptController = new CryptController(sourceFile, destinationFile, key, false, reporter);
+			cryptController.execute();
+			// update the progress bar
+			cryptController.addPropertyChangeListener((pce) -> {
+				if (pce.getPropertyName().equals("progress")) {
+					int progress = (Integer) pce.getNewValue();
+					progressBar.setValue(progress);
 				}
-			} while (result != null && !isValidKey(result));
-		} else {
-			JOptionPane.showMessageDialog(this, "Please select a source and destination file.");
+			});
+			// TODO: remove property change listener after the task is done
 		}
 	}
 
@@ -314,60 +319,68 @@ public class BasicCryptGUI extends JFrame {
 		}
 	}
 
-	private boolean isValidKey(String key) {
-		return key != null && key.matches("^(?:[A-Za-z0-9/+]){21}?[A-D]$");
+	private void enableButtons() {
+		sourceFileBtn.setEnabled(true);
+		destinationFileBtn.setEnabled(true);
+		hashFileBtn.setEnabled(true);
+		encryptBtn.setEnabled(true);
+		decryptBtn.setEnabled(true);
+		cancelBtn.setEnabled(false);
+		clearBtn.setEnabled(true);
+		exitBtn.setEnabled(true);
 	}
 
-	private class AsyncFileController extends AsyncController {
-		long maxProgress;
-		long currentProgress;
-		boolean done;
-		boolean canceled;
+	private void disableButtons() {
+		sourceFileBtn.setEnabled(false);
+		destinationFileBtn.setEnabled(false);
+		hashFileBtn.setEnabled(false);
+		encryptBtn.setEnabled(false);
+		decryptBtn.setEnabled(false);
+		cancelBtn.setEnabled(true);
+		clearBtn.setEnabled(false);
+		exitBtn.setEnabled(false);
+	}
 
-		/* Runs in GUI thread */
+	private byte[] getKey() {
+		if (sourceFile != null && destinationFile != null) {
+			String result = null;
+			byte[] key = null;
+			do {
+				result = JOptionPane.showInputDialog(this, KEY_REQUIREMENTS_DESCRIPTION);
+				if (isValidKey(result)) {
+					key = Base64.getDecoder().decode(result);
+				} else if (result != null) {
+					JOptionPane.showMessageDialog(this, "Invalid key, please try again.");
+				}
+			} while (result != null && key == null);
+			return key;
+		} else {
+			JOptionPane.showMessageDialog(this, "Please select a source and destination file.");
+			return null;
+		}
+	}
+
+	private boolean isValidKey(String key) {
+		return key != null && key.matches("^(?:[A-Za-z0-9/+]){21}?[AQgw]$");
+	}
+
+	private class FileReporter implements WorkerReporter {
 		@Override
-		public void cancel() {
-			canceled = true;
+		public void onCancelled() {
+			// TODO: add cancelled status message.
+			enableButtons();
 		}
 
-		/* Runs in background thread */
 		@Override
-		public boolean isCanceled() {
-			return canceled;
+		public void onComplete() {
+			// TODO: add success status message.
+			enableButtons();
 		}
 
-		/* Runs in background thread */
 		@Override
-		public void setMaxProgress(long max) {
-			if (max > 0)
-				maxProgress = max;
-		}
-
-		/* Runs in background thread */
-		@Override
-		public void setProgress(long progress) {
-			if (progress > 0)
-				currentProgress = progress;
-			this.setChanged();
-			this.notifyObservers();
-		}
-
-		/* Runs in GUI thread */
-		@Override
-		public double getProgress() {
-			return (maxProgress > 0) ? (currentProgress * 1.0 / maxProgress) : 0;
-		}
-
-		/* Runs in background thread */
-		@Override
-		public void setDone() {
-			done = true;
-		}
-
-		/* Runs in GUI thread */
-		@Override
-		public boolean isDone() {
-			return done;
+		public void onError(String message) {
+			// TODO: add error status message.
+			enableButtons();
 		}
 	}
 
