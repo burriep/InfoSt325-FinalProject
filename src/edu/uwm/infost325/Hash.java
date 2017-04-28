@@ -3,6 +3,8 @@ import java.security.MessageDigest;
 import java.util.Scanner;
 import java.io.*;
 import javax.crypto.*;
+import java.util.Enumeration;
+
 
 import javax.xml.bind.DatatypeConverter;
 class Hash2 {
@@ -40,9 +42,5 @@ class Hash2 {
 		return hashValue;
 	}
 	
-	public static void main(String[] args){
-		String x = "Hello world";
-		
-		
-	}
 }
+
