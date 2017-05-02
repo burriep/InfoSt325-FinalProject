@@ -7,9 +7,14 @@ package edu.uwm.infost325;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
 import javax.swing.*;
+import javax.xml.bind.DatatypeConverter;
 
 /**
  *
@@ -43,7 +48,18 @@ public class BasicCryptGUI extends JFrame {
 	private JProgressBar progressBar;
 
 	private CryptController cryptController;
-	FileReporter reporter;
+	private CryptReporter cryptReporter;
+	private HashController hashController;
+	private HashReporter hashReporter;
+	private PropertyChangeListener pcl = new PropertyChangeListener() {
+		@Override
+		public void propertyChange(PropertyChangeEvent pce) {
+			if (pce.getPropertyName().equals("progress")) {
+				int progress = (Integer) pce.getNewValue();
+				progressBar.setValue(progress);
+			}
+		}
+	};
 
 	public BasicCryptGUI() {
 		initComponents();
@@ -51,7 +67,8 @@ public class BasicCryptGUI extends JFrame {
 		// Creates the file choosers
 		sourceLocation = new JFileChooser();
 		destLocation = new JFileChooser();
-		reporter = new FileReporter();
+		cryptReporter = new CryptReporter();
+		hashReporter = new HashReporter();
 	}
 
 	private void initComponents() {
@@ -150,6 +167,7 @@ public class BasicCryptGUI extends JFrame {
 		cancelBtn.setMinimumSize(new Dimension(93, 29));
 		cancelBtn.setPreferredSize(new Dimension(93, 29));
 		cancelBtn.setEnabled(false);
+		cancelBtn.addActionListener((evt) -> doCancel(evt));
 
 		clearBtn.setText("Clear");
 		clearBtn.setMaximumSize(new Dimension(93, 29));
@@ -275,22 +293,20 @@ public class BasicCryptGUI extends JFrame {
 		// Resets File variables
 		sourceFile = null;
 		destinationFile = null;
+
+		// Reset progress bar
+		progressBar.setValue(0);
+		progressBar.setIndeterminate(false);
 	}
 
 	private void doEncryptFile(ActionEvent evt) {
 		byte[] key = getKey();
 		if (key != null) {
 			disableButtons();
-			cryptController = new CryptController(sourceFile, destinationFile, key, true, reporter);
+			cryptController = new CryptController(sourceFile, destinationFile, key, true, cryptReporter);
 			cryptController.execute();
 			// update the progress bar
-			cryptController.addPropertyChangeListener((pce) -> {
-				if (pce.getPropertyName().equals("progress")) {
-					int progress = (Integer) pce.getNewValue();
-					progressBar.setValue(progress);
-				}
-			});
-			// TODO: remove property change listener after the task is done
+			cryptController.addPropertyChangeListener(pcl);
 		}
 	}
 
@@ -298,24 +314,41 @@ public class BasicCryptGUI extends JFrame {
 		byte[] key = getKey();
 		if (key != null) {
 			disableButtons();
-			cryptController = new CryptController(sourceFile, destinationFile, key, false, reporter);
+			cryptController = new CryptController(sourceFile, destinationFile, key, false, cryptReporter);
 			cryptController.execute();
 			// update the progress bar
-			cryptController.addPropertyChangeListener((pce) -> {
-				if (pce.getPropertyName().equals("progress")) {
-					int progress = (Integer) pce.getNewValue();
-					progressBar.setValue(progress);
-				}
-			});
-			// TODO: remove property change listener after the task is done
+			cryptController.addPropertyChangeListener(pcl);
 		}
 	}
 
 	private void doHashFile(ActionEvent evt) {
 		if (sourceFile != null) {
-			// TODO: hash file
+			disableButtons();
+			hashController = new HashController(sourceFile, hashReporter);
+			hashController.execute();
+			// update the progress bar
+			hashController.addPropertyChangeListener(pcl);
 		} else {
 			JOptionPane.showMessageDialog(this, "Please select a source file.");
+		}
+	}
+
+	private void doCancel(ActionEvent evt) {
+		// TODO: maybe set the progress bar to indeterminate state.
+		if (cryptController != null) {
+			if (cryptController.cancel(true)) {
+				// cancelled successfully
+			} else {
+				// unable to cancel
+				// TODO: show error message saying unable to cancel
+			}
+		} else if (hashController != null) {
+			if (hashController.cancel(true)) {
+				// cancelled successfully
+			} else {
+				// unable to cancel
+				// TODO: show error message saying unable to cancel
+			}
 		}
 	}
 
@@ -364,23 +397,68 @@ public class BasicCryptGUI extends JFrame {
 		return key != null && key.matches("^(?:[A-Za-z0-9/+]){21}?[AQgw]$");
 	}
 
-	private class FileReporter implements WorkerReporter {
+	private class CryptReporter implements WorkerReporter {
+		private void cleanup() {
+			cryptController.removePropertyChangeListener(pcl);
+			cryptController = null;
+			enableButtons();
+		}
+
 		@Override
 		public void onCancelled() {
 			// TODO: add cancelled status message.
-			enableButtons();
+			cleanup();
 		}
 
 		@Override
 		public void onComplete() {
 			// TODO: add success status message.
-			enableButtons();
+			cleanup();
 		}
 
 		@Override
 		public void onError(String message) {
 			// TODO: add error status message.
+			cleanup();
+		}
+	}
+
+	private class HashReporter implements WorkerReporter {
+		private void cleanup() {
+			hashController.removePropertyChangeListener(pcl);
+			hashController = null;
 			enableButtons();
+		}
+
+		@Override
+		public void onCancelled() {
+			// TODO: add cancelled status message.
+			cleanup();
+		}
+
+		@Override
+		public void onComplete() {
+			// get the hash and show it on the screen in hexadecimal
+			try {
+				byte[] hash = hashController.get();
+				if (hash != null) {
+					hashResultField.setText(DatatypeConverter.printHexBinary(hash));
+				} else {
+					// TODO: shouldn't happen in real operation
+					hashResultField.setText("testing");
+				}
+			} catch (InterruptedException | ExecutionException e) {
+				// TODO: customize catch block
+				e.printStackTrace();
+			}
+			// TODO: add success status message.
+			cleanup();
+		}
+
+		@Override
+		public void onError(String message) {
+			// TODO: add error status message.
+			cleanup();
 		}
 	}
 
