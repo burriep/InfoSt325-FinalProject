@@ -9,37 +9,28 @@ import java.util.Enumeration;
 import javax.xml.bind.DatatypeConverter;
 class Hash2 {
 	
-	public static void Name1(InputStream hey, OutputStream hello, Cipher hrm)
+	public static MessageDigest Name1(InputStream i, OutputStream oS, Cipher hrm, String update)
 		throws FileNotFoundException, IOException, IllegalBlockSizeException, BadPaddingException{
+			
+			MessageDigest a = MessageDigest.getInstance("SHA-256");
 			byte[] buffer = new byte[512];
 			int bytesToRead = 0;
+			int totalBytes;
 			while ((bytesToRead = hey.read(buffer)) > 0){
 				byte[] cipherLearn = hrm.update(buffer, 0, bytesToRead);
 				if (cipherLearn != null){
 					hello.write(cipherLearn);
+					a.update(hello);
+					a.digest();
 				}
 			}
-			byte[] cipherLearn = hrm.doFinal();
-			if (cipherLearn != null) {
-				hello.write(cipherLearn);
-			}		
-	}
-		
-	public static String getHash(byte[] inputByte, String algorithm){
-		String hashValue = "";
-		try{
-			
-			MessageDigest messageD1 = MessageDigest.getInstance(algorithm);
-			messageD1.update(inputByte);
-			byte[] digestedBytes = messageD1.digest();
-			hashValue = DatatypeConverter.printHexBinary(digestedBytes).toLowerCase();
-			
-		}
-		catch(Exception e){
-			
-			System.out.println("There was an error: " + e);
-		}
-		return hashValue;
+			String hashValue = "";
+				
+				MessageDigest messageD1 = MessageDigest.getInstance();
+				byte[] digestedBytes = messageD1.digest();
+				hashValue = DatatypeConverter.printHexBinary(digestedBytes).toLowerCase();
+				
+			return a;
 	}
 	
 }
