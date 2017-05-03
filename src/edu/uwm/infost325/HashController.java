@@ -25,12 +25,12 @@ public class HashController extends SwingWorker<byte[], Integer> {
 		byte[] buffer = new byte[512];
 		// create a new buffered file input stream for the source file
 		try(InputStream iN = new BufferedInputStream(new FileInputStream(input))){
-			try (OutputStream oS = new BufferedOutputStream(new FileOutputStream(output))){
+			
 				setProgress(0);
 
 				// set the progress to 0
 				int bytesRead = 0;
-				int totalBytes;
+				int totalBytes = 0;
 				// get a MessageDigest instance
 				MessageDigest a = MessageDigest.getInstance("SHA-256");
 				// read the file in chunks and update the MessageDigest instance with every chunk read
@@ -38,14 +38,11 @@ public class HashController extends SwingWorker<byte[], Integer> {
 				{
 					totalBytes += bytesRead;
 					setProgress(totalBytes * 100 / sourceFileSize);
-					byte[] hashReturn = a.update(buffer, 0, bytesRead);
-					if (hashReturn != null ){
-						oS.write(hashReturn);
-					}
-				}
-
+					a.update(buffer, 0, bytesRead);		
 			}
+				buffer = a.digest();
 		}
+		return buffer;
 	}
 
 	@Override
