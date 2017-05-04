@@ -26,7 +26,7 @@ public class BasicCryptGUI extends JFrame {
 	// Creates the file chooser objects
 	private final JFileChooser sourceLocation;
 	private final JFileChooser destLocation;
-	
+
 	private final String KEY_REQUIREMENTS_DESCRIPTION = "Enter a 22 character key meeting the following requirements:\nValid characters: A-Z, a-z, /, + (not the comma character)\nThe last letter must be A, Q, g, or w.";
 
 	// Creates the file objects
@@ -44,8 +44,8 @@ public class BasicCryptGUI extends JFrame {
 	private JButton cancelBtn;
 	private JButton clearBtn;
 	private JButton aboutBtn;
-	private JButton exitBtn;
 	private JProgressBar progressBar;
+	private JLabel statusLabel;
 
 	private CryptController cryptController;
 	private CryptReporter cryptReporter;
@@ -62,193 +62,98 @@ public class BasicCryptGUI extends JFrame {
 	};
 
 	public BasicCryptGUI() {
-		initComponents();
+		super("Question Editor");
+		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		this.setSize(500, 350);
+
+		addWindowListener(new WindowAdapter() {
+		      @Override
+		      public void windowClosing(WindowEvent e) {
+		        doExit();
+		      }
+		});
 
 		// Creates the file choosers
 		sourceLocation = new JFileChooser();
 		destLocation = new JFileChooser();
 		cryptReporter = new CryptReporter();
 		hashReporter = new HashReporter();
+
+		initComponents();
 	}
 
 	private void initComponents() {
-		progressBar = new JProgressBar();
-		JPanel jPanel1 = new JPanel();
-		JPanel jPanel3 = new JPanel();
-		JPanel jPanel4 = new JPanel();
-		sourceFileBtn = new JButton();
-		destinationFileBtn = new JButton();
-		sourceFileField = new JTextField();
-		destinationFileField = new JTextField();
-		hashFileBtn = new JButton();
+		sourceFileBtn = new JButton("Source Location");
+		destinationFileBtn = new JButton("Destination Location");
+		sourceFileField = new JTextField("Source File Path");
+		destinationFileField = new JTextField("Destination File Path");
+		hashFileBtn = new JButton("Hash File");
 		hashResultField = new JTextField();
-		JSeparator jSeparator1 = new JSeparator();
-		encryptBtn = new JButton();
-		decryptBtn = new JButton();
-		cancelBtn = new JButton();
-		clearBtn = new JButton();
-		aboutBtn = new JButton();
-		exitBtn = new JButton();
+		encryptBtn = new JButton("Encrypt");
+		decryptBtn = new JButton("Decrypt");
+		cancelBtn = new JButton("Cancel");
+		clearBtn = new JButton("Clear");
+		aboutBtn = new JButton("About");
+		statusLabel = new JLabel(" ");
+		progressBar = new JProgressBar();
 
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		JPanel contentPane = new JPanel(new BorderLayout());
+		setContentPane(contentPane);
+		contentPane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-		sourceFileBtn.setText("Source Location");
 		sourceFileBtn.addActionListener((evt) -> doChooseSourceFile(evt));
-
-		destinationFileBtn.setText("Destination Location");
 		destinationFileBtn.addActionListener((evt) -> doChooseDestinationFile(evt));
-
 		sourceFileField.setEditable(false);
-		sourceFileField.setText("Source File Path");
-
 		destinationFileField.setEditable(false);
-		destinationFileField.setText("Destination File Path");
 
-		GroupLayout jPanel3Layout = new GroupLayout(jPanel3);
-		jPanel3.setLayout(jPanel3Layout);
-		jPanel3Layout
-			.setHorizontalGroup(jPanel3Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-			.addGroup(jPanel3Layout.createSequentialGroup()
-			.addGroup(jPanel3Layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-			.addComponent(sourceFileBtn, GroupLayout.PREFERRED_SIZE, 185, GroupLayout.PREFERRED_SIZE)
-			.addComponent(sourceFileField, GroupLayout.PREFERRED_SIZE, 285, GroupLayout.PREFERRED_SIZE))
-			.addGroup(jPanel3Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-			.addGroup(jPanel3Layout.createSequentialGroup()
-			.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-			.addComponent(destinationFileBtn, GroupLayout.PREFERRED_SIZE, 185, GroupLayout.PREFERRED_SIZE)
-			.addContainerGap(100, Short.MAX_VALUE))
-			.addGroup(jPanel3Layout.createSequentialGroup()
-			.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-			.addComponent(destinationFileField)))));
-		jPanel3Layout
-			.setVerticalGroup(jPanel3Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-			.addGroup(GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup().addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-			.addGroup(jPanel3Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-			.addComponent(sourceFileBtn, GroupLayout.PREFERRED_SIZE, 80, GroupLayout.PREFERRED_SIZE)
-			.addComponent(destinationFileBtn, GroupLayout.PREFERRED_SIZE, 80, GroupLayout.PREFERRED_SIZE))
-			.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-			.addGroup(jPanel3Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-			.addComponent(sourceFileField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-			.addComponent(destinationFileField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-			.addContainerGap()));
+		JPanel filePanel = new JPanel(new GridLayout(1, 2, 10, 0));
+		JPanel sourceFilePanel = new JPanel(new BorderLayout());
+		filePanel.add(sourceFilePanel);
+		sourceFilePanel.add(sourceFileBtn, BorderLayout.CENTER);
+		sourceFilePanel.add(sourceFileField, BorderLayout.SOUTH);
+		JPanel destinationFilePanel = new JPanel(new BorderLayout());
+		filePanel.add(destinationFilePanel);
+		destinationFilePanel.add(destinationFileBtn, BorderLayout.CENTER);
+		destinationFilePanel.add(destinationFileField, BorderLayout.SOUTH);
+		add(filePanel, BorderLayout.CENTER);
 
-		hashFileBtn.setText("Hash File");
 		hashFileBtn.addActionListener((evt) -> doHashFile(evt));
-
 		hashResultField.setEditable(false);
 
-		GroupLayout jPanel4Layout = new GroupLayout(jPanel4);
-		jPanel4.setLayout(jPanel4Layout);
-		jPanel4Layout
-			.setHorizontalGroup(jPanel4Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-			.addGroup(jPanel4Layout.createSequentialGroup().addContainerGap().addComponent(hashFileBtn)
-			.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(hashResultField)
-			.addContainerGap()));
-		jPanel4Layout
-			.setVerticalGroup(jPanel4Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-			.addGroup(jPanel4Layout.createSequentialGroup().addGap(10, 10, 10)
-			.addGroup(jPanel4Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-			.addComponent(hashFileBtn).addComponent(hashResultField, GroupLayout.PREFERRED_SIZE,
-			GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-			.addContainerGap(10, Short.MAX_VALUE)));
+		JPanel hashPanel = new JPanel(new BorderLayout());
+		hashPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+		hashPanel.add(hashFileBtn, BorderLayout.WEST);
+		hashPanel.add(hashResultField, BorderLayout.CENTER);
 
-		jPanel1.setBorder(BorderFactory.createTitledBorder("Program Controls"));
-		jPanel1.setToolTipText("");
-
-		encryptBtn.setText("Encrypt");
-		encryptBtn.setMaximumSize(new Dimension(93, 29));
 		encryptBtn.addActionListener((evt) -> doEncryptFile(evt));
-
-		decryptBtn.setText("Decrypt");
 		decryptBtn.addActionListener((evt) -> doDecryptFile(evt));
-
-		cancelBtn.setText("Cancel");
-		cancelBtn.setMaximumSize(new Dimension(93, 29));
-		cancelBtn.setMinimumSize(new Dimension(93, 29));
-		cancelBtn.setPreferredSize(new Dimension(93, 29));
-		cancelBtn.setEnabled(false);
 		cancelBtn.addActionListener((evt) -> doCancel(evt));
-
-		clearBtn.setText("Clear");
-		clearBtn.setMaximumSize(new Dimension(93, 29));
-		clearBtn.setMinimumSize(new Dimension(93, 29));
-		clearBtn.setPreferredSize(new Dimension(93, 29));
+		cancelBtn.setEnabled(false);
 		clearBtn.addActionListener((evt) -> doClearFiles(evt));
-
-		aboutBtn.setText("About");
-		aboutBtn.setMaximumSize(new Dimension(93, 29));
-		aboutBtn.setMinimumSize(new Dimension(93, 29));
-		aboutBtn.setPreferredSize(new Dimension(93, 29));
 		aboutBtn.addActionListener((evt) -> doAbout(evt));
 
-		GroupLayout jPanel1Layout = new GroupLayout(jPanel1);
-		jPanel1.setLayout(jPanel1Layout);
-		jPanel1Layout
-			.setHorizontalGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-			.addGroup(jPanel1Layout.createSequentialGroup().addGap(38, 38, 38)
-			.addComponent(encryptBtn, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-			.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(decryptBtn)
-			.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-			.addComponent(cancelBtn, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-			.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-			.addComponent(clearBtn, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-			.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-			.addComponent(aboutBtn, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-			.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
-		jPanel1Layout
-			.setVerticalGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-			.addGroup(jPanel1Layout.createSequentialGroup().addGap(20, 20, 20)
-			.addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-			.addComponent(encryptBtn, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-			.addComponent(decryptBtn)
-			.addComponent(cancelBtn, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-			.addComponent(clearBtn, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-			.addComponent(aboutBtn, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-			.addContainerGap(24, Short.MAX_VALUE)));
+		JPanel controlsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		controlsPanel.setBorder(BorderFactory.createTitledBorder("Program Controls"));
+		controlsPanel.add(encryptBtn);
+		controlsPanel.add(decryptBtn);
+		controlsPanel.add(cancelBtn);
+		controlsPanel.add(clearBtn);
+		controlsPanel.add(aboutBtn);
 
-		exitBtn.setText("Exit");
-		exitBtn.setMaximumSize(new Dimension(93, 29));
-		exitBtn.setMinimumSize(new Dimension(93, 29));
-		exitBtn.setPreferredSize(new Dimension(93, 29));
-		exitBtn.addActionListener((evt) -> doExit(evt));
+		JPanel statusPanel = new JPanel(new BorderLayout());
+		statusPanel.add(progressBar, BorderLayout.CENTER);
+		statusPanel.add(statusLabel, BorderLayout.SOUTH);
 
-		GroupLayout layout = new GroupLayout(getContentPane());
-		getContentPane().setLayout(layout);
-		layout
-			.setHorizontalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-			.addComponent(jSeparator1).addGroup(layout.createSequentialGroup().addGroup(layout
-			.createParallelGroup(GroupLayout.Alignment.LEADING)
-			.addGroup(layout.createSequentialGroup().addContainerGap()
-			.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-			.addComponent(jPanel4, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-			.addComponent(progressBar, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-			.addComponent(jPanel1, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-			.addGroup(layout.createSequentialGroup()
-			.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-			.addGroup(layout.createSequentialGroup().addContainerGap().addComponent( jPanel3, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-			.addGroup(layout.createSequentialGroup().addGap(227, 227, 227)
-			.addComponent(exitBtn, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE)))
-			.addGap(0, 0, Short.MAX_VALUE)))
-			.addContainerGap()));
-		layout
-			.setVerticalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(layout
-			.createSequentialGroup()
-			.addComponent(jPanel3, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-			.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-			.addComponent(jSeparator1, GroupLayout.PREFERRED_SIZE, 10, GroupLayout.PREFERRED_SIZE)
-			.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-			.addComponent(jPanel4, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-			.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-			.addComponent(jPanel1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-			.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-			.addComponent(progressBar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-			.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-			.addComponent(exitBtn, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-			.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
-		pack();
+		JPanel bottomPanel = new JPanel(new BorderLayout());
+		bottomPanel.add(hashPanel, BorderLayout.NORTH);
+		bottomPanel.add(controlsPanel, BorderLayout.CENTER);
+		bottomPanel.add(statusPanel, BorderLayout.SOUTH);
+		add(bottomPanel, BorderLayout.SOUTH);
+		
+		validate();
 	}
 
-	private void doExit(ActionEvent evt) {
+	private void doExit() {
 		// Exits the program
 		System.exit(0);
 	}
@@ -267,7 +172,8 @@ public class BasicCryptGUI extends JFrame {
 		int returnVal = sourceLocation.showOpenDialog(this);
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			// if the user selected a file, save the file and display the filename
+			// if the user selected a file, save the file and display the
+			// filename
 			sourceFile = sourceLocation.getSelectedFile();
 			sourceFileField.setText(sourceFile.getName());
 		}
@@ -278,7 +184,8 @@ public class BasicCryptGUI extends JFrame {
 		int returnVal = destLocation.showSaveDialog(this);
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			// if the user selected a file, save the file and display the filename
+			// if the user selected a file, save the file and display the
+			// filename
 			destinationFile = destLocation.getSelectedFile();
 			destinationFileField.setText(destinationFile.getName());
 		}
@@ -360,7 +267,6 @@ public class BasicCryptGUI extends JFrame {
 		decryptBtn.setEnabled(true);
 		cancelBtn.setEnabled(false);
 		clearBtn.setEnabled(true);
-		exitBtn.setEnabled(true);
 	}
 
 	private void disableButtons() {
@@ -371,7 +277,6 @@ public class BasicCryptGUI extends JFrame {
 		decryptBtn.setEnabled(false);
 		cancelBtn.setEnabled(true);
 		clearBtn.setEnabled(false);
-		exitBtn.setEnabled(false);
 	}
 
 	private byte[] getKey() {
