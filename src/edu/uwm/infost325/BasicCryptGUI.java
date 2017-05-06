@@ -28,6 +28,18 @@ public class BasicCryptGUI extends JFrame {
 	private final JFileChooser destLocation;
 
 	private final String KEY_REQUIREMENTS_DESCRIPTION = "Enter a 22 character key meeting the following requirements:\nValid characters: A-Z, a-z, /, + (not the comma character)\nThe last letter must be A, Q, g, or w.";
+	private static final String ABOUT_MESSAGE = "Cryptology\n" + "Encrypt, decrypt, and hash files.\n\n"
+			+ "Created by: Paul Burrie, Jack Skelton, Zach Zenner\n\n"
+			+ "To encrypt a file, select the cleartext source file and select the destination\n"
+			+ "where the encrypted file will be saved. Then click the 'encrypt' button.\n"
+			+ "You will be asked to enter an encryption key. After entering a valid key,\n"
+			+ "the file is encrypted and saved at the destination file location.\n\n"
+			+ "For decryption, select the encrypted source file and select the destination\n"
+			+ "where the decrypted file will be saved. Then click the 'decrypt' button.\n"
+			+ "You will be asked to enter the decryption key. After entering a valid key,\n"
+			+ "the file is decrypted and saved at the destination file location.\n\n"
+			+ "To calculate the hash value of a file, select the source file and\n"
+			+ "click the 'hash' button. The hash will be shown in the window.";
 
 	// Creates the file objects
 	public File destinationFile;
@@ -60,17 +72,18 @@ public class BasicCryptGUI extends JFrame {
 			}
 		}
 	};
+	private boolean encrypt;
 
 	public BasicCryptGUI() {
 		super("Question Editor");
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		this.setSize(500, 350);
+		setSize(500, 350);
 
 		addWindowListener(new WindowAdapter() {
-		      @Override
-		      public void windowClosing(WindowEvent e) {
-		        doExit();
-		      }
+			@Override
+			public void windowClosing(WindowEvent e) {
+				doExit();
+			}
 		});
 
 		// Creates the file choosers
@@ -80,6 +93,7 @@ public class BasicCryptGUI extends JFrame {
 		hashReporter = new HashReporter();
 
 		initComponents();
+		setVisible(true);
 	}
 
 	private void initComponents() {
@@ -149,7 +163,7 @@ public class BasicCryptGUI extends JFrame {
 		bottomPanel.add(controlsPanel, BorderLayout.CENTER);
 		bottomPanel.add(statusPanel, BorderLayout.SOUTH);
 		add(bottomPanel, BorderLayout.SOUTH);
-		
+
 		validate();
 	}
 
@@ -160,18 +174,7 @@ public class BasicCryptGUI extends JFrame {
 
 	private void doAbout(ActionEvent evt) {
 		// Opens the about frame
-                JOptionPane.showMessageDialog(this, "Cryptology\n" + "Encrypt, decrypt, and hash files.\n\n"
-				+ "Created by: Paul Burrie, Jack Skelton, Zach Zenner\n\n"
-				+ "To encrypt a file, select the cleartext source file and select the destination\n"
-				+ "where the encrypted file will be saved. Then click the 'encrypt' button.\n"
-				+ "You will be asked to enter an encryption key. After entering a valid key,\n"
-				+ "the file is encrypted and saved at the destination file location.\n\n"
-				+ "For decryption, select the encrypted source file and select the destination\n"
-				+ "where the decrypted file will be saved. Then click the 'decrypt' button.\n"
-				+ "You will be asked to enter the decryption key. After entering a valid key,\n"
-				+ "the file is decrypted and saved at the destination file location.\n\n"
-				+ "To calculate the hash value of a file, select the source file and\n"
-				+ "click the 'hash' button. The hash will be shown in the window.");
+		JOptionPane.showMessageDialog(this, ABOUT_MESSAGE);
 	}
 
 	private void doChooseSourceFile(ActionEvent evt) {
@@ -216,7 +219,9 @@ public class BasicCryptGUI extends JFrame {
 	private void doEncryptFile(ActionEvent evt) {
 		byte[] key = getKey();
 		if (key != null) {
+			encrypt = true;
 			disableButtons();
+			progressBar.setValue(0);
 			cryptController = new CryptController(sourceFile, destinationFile, key, true, cryptReporter);
 			cryptController.execute();
 			// update the progress bar
@@ -227,7 +232,9 @@ public class BasicCryptGUI extends JFrame {
 	private void doDecryptFile(ActionEvent evt) {
 		byte[] key = getKey();
 		if (key != null) {
+			encrypt = false;
 			disableButtons();
+			progressBar.setValue(0);
 			cryptController = new CryptController(sourceFile, destinationFile, key, false, cryptReporter);
 			cryptController.execute();
 			// update the progress bar
@@ -238,6 +245,7 @@ public class BasicCryptGUI extends JFrame {
 	private void doHashFile(ActionEvent evt) {
 		if (sourceFile != null) {
 			disableButtons();
+			progressBar.setValue(0);
 			hashController = new HashController(sourceFile, hashReporter);
 			hashController.execute();
 			// update the progress bar
@@ -248,8 +256,7 @@ public class BasicCryptGUI extends JFrame {
 	}
 
 	private void doCancel(ActionEvent evt) {
-		// TODO: maybe set the progress bar to indeterminate state.
-                progressBar.setIndeterminate(true);
+		progressBar.setIndeterminate(true);
 		if (cryptController != null) {
 			if (cryptController.cancel(true)) {
 				// cancelled successfully
@@ -315,6 +322,7 @@ public class BasicCryptGUI extends JFrame {
 			cryptController.removePropertyChangeListener(pcl);
 			cryptController = null;
 			enableButtons();
+			progressBar.setIndeterminate(false);
 		}
 
 		@Override
@@ -325,7 +333,7 @@ public class BasicCryptGUI extends JFrame {
 
 		@Override
 		public void onComplete() {
-			statusLabel.setText("The file has been encrypted!");
+			statusLabel.setText("The file has been " + (encrypt ? "encrypted" : "decrypted") + "!");
 			cleanup();
 		}
 
@@ -341,6 +349,7 @@ public class BasicCryptGUI extends JFrame {
 			hashController.removePropertyChangeListener(pcl);
 			hashController = null;
 			enableButtons();
+			progressBar.setIndeterminate(false);
 		}
 
 		@Override
@@ -361,8 +370,7 @@ public class BasicCryptGUI extends JFrame {
 					hashResultField.setText("testing");
 				}
 			} catch (InterruptedException | ExecutionException e) {
-				// TODO: customize catch block
-				e.printStackTrace();
+				statusLabel.setText("An error has occurred!");
 			}
 			statusLabel.setText("The file has been hashed!");
 			cleanup();
@@ -389,8 +397,6 @@ public class BasicCryptGUI extends JFrame {
 			// TODO: show error dialog
 		}
 		// Display the GUI
-		EventQueue.invokeLater(() -> {
-			new BasicCryptGUI().setVisible(true);
-		});
+		new BasicCryptGUI();
 	}
 }

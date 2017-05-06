@@ -40,6 +40,9 @@ public class CryptController extends SwingWorker<Void, Integer> {
 		} else {
 			decrypt(sourceFile, destinationFile);
 		}
+		if (isCancelled()) {
+			destinationFile.delete();
+		}
 		return null;
 	}
 
@@ -67,7 +70,6 @@ public class CryptController extends SwingWorker<Void, Integer> {
 			aesCipher.init(Cipher.ENCRYPT_MODE, key, ivParamSpec);
 			try (InputStream fis = new BufferedInputStream(new FileInputStream(input))) {
 				try (OutputStream fos = new BufferedOutputStream(new FileOutputStream(output))) {
-					setProgress(0);
 					// write the IV to the output file
 					fos.write(iv);
 					// write the encrypted file to the output file
