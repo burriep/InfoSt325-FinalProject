@@ -160,11 +160,18 @@ public class BasicCryptGUI extends JFrame {
 
 	private void doAbout(ActionEvent evt) {
 		// Opens the about frame
-		JFrame frame = new aboutGUI();
-		frame.setTitle("Cryptology About");
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		frame.setVisible(true);
-		frame.setResizable(false);
+                JOptionPane.showMessageDialog(this, "Cryptology\n" + "Encrypt, decrypt, and hash files.\n\n"
+				+ "Created by: Paul Burrie, Jack Skelton, Zach Zenner\n\n"
+				+ "To encrypt a file, select the cleartext source file and select the destination\n"
+				+ "where the encrypted file will be saved. Then click the 'encrypt' button.\n"
+				+ "You will be asked to enter an encryption key. After entering a valid key,\n"
+				+ "the file is encrypted and saved at the destination file location.\n\n"
+				+ "For decryption, select the encrypted source file and select the destination\n"
+				+ "where the decrypted file will be saved. Then click the 'decrypt' button.\n"
+				+ "You will be asked to enter the decryption key. After entering a valid key,\n"
+				+ "the file is decrypted and saved at the destination file location.\n\n"
+				+ "To calculate the hash value of a file, select the source file and\n"
+				+ "click the 'hash' button. The hash will be shown in the window.");
 	}
 
 	private void doChooseSourceFile(ActionEvent evt) {
@@ -242,19 +249,20 @@ public class BasicCryptGUI extends JFrame {
 
 	private void doCancel(ActionEvent evt) {
 		// TODO: maybe set the progress bar to indeterminate state.
+                progressBar.setIndeterminate(true);
 		if (cryptController != null) {
 			if (cryptController.cancel(true)) {
 				// cancelled successfully
 			} else {
 				// unable to cancel
-				// TODO: show error message saying unable to cancel
+				statusLabel.setText("Unable to cancel the process...");
 			}
 		} else if (hashController != null) {
 			if (hashController.cancel(true)) {
 				// cancelled successfully
 			} else {
 				// unable to cancel
-				// TODO: show error message saying unable to cancel
+				statusLabel.setText("Unable to cancel the process...");
 			}
 		}
 	}
@@ -311,19 +319,19 @@ public class BasicCryptGUI extends JFrame {
 
 		@Override
 		public void onCancelled() {
-			// TODO: add cancelled status message.
+			statusLabel.setText("The process has been cancelled...");
 			cleanup();
 		}
 
 		@Override
 		public void onComplete() {
-			// TODO: add success status message.
+			statusLabel.setText("The file has been encrypted!");
 			cleanup();
 		}
 
 		@Override
 		public void onError(String message) {
-			// TODO: add error status message.
+			statusLabel.setText("An error has occurred!");
 			cleanup();
 		}
 	}
@@ -337,7 +345,7 @@ public class BasicCryptGUI extends JFrame {
 
 		@Override
 		public void onCancelled() {
-			// TODO: add cancelled status message.
+			statusLabel.setText("The process has been cancelled...");
 			cleanup();
 		}
 
@@ -356,13 +364,13 @@ public class BasicCryptGUI extends JFrame {
 				// TODO: customize catch block
 				e.printStackTrace();
 			}
-			// TODO: add success status message.
+			statusLabel.setText("The file has been hashed!");
 			cleanup();
 		}
 
 		@Override
 		public void onError(String message) {
-			// TODO: add error status message.
+			statusLabel.setText("An error has occurred!");
 			cleanup();
 		}
 	}
