@@ -1,7 +1,12 @@
 /*
- * Sources referenced (besides the Java language reference)
- * http://www.java2s.com/Tutorial/Java/0240__Swing/InputPopUps.htm
- * https://docs.oracle.com/javase/tutorial/uiswing/concurrency/worker.html
+ * Sources referenced:
+ * - (Java 8 API Specification)
+ * - http://www.java2s.com/Tutorial/Java/0240__Swing/InputPopUps.htm
+ * - https://docs.oracle.com/javase/tutorial/uiswing/concurrency/worker.html
+ * - https://stackoverflow.com/questions/356671/jfilechooser-showsavedialog-how-to-set-suggested-file-name
+ * - Related cryptography project Paul did in another security class (CS658 Cyber Security Lab) in a previous semester.
+ * 
+ * Created by: Paul Burrie, Jack Skelton, Zach Zenner
  */
 package edu.uwm.infost325;
 
@@ -16,10 +21,6 @@ import java.beans.PropertyChangeListener;
 import javax.swing.*;
 import javax.xml.bind.DatatypeConverter;
 
-/**
- *
- * @author zach
- */
 public class BasicCryptGUI extends JFrame {
 	// Keep Eclipse Happy
 	private static final long serialVersionUID = 1L;
@@ -27,7 +28,7 @@ public class BasicCryptGUI extends JFrame {
 	private final JFileChooser sourceLocation;
 	private final JFileChooser destLocation;
 
-	private final String KEY_REQUIREMENTS_DESCRIPTION = "Enter a 22 character key meeting the following requirements:\nValid characters: A-Z, a-z, /, + (not the comma character)\nThe last letter must be A, Q, g, or w.";
+	private static final String KEY_REQUIREMENTS_DESCRIPTION = "Enter a 22 character key meeting the following requirements:\nValid characters: A-Z, a-z, /, + (not the comma character)\nThe last letter must be A, Q, g, or w.";
 	private static final String ABOUT_MESSAGE = "Cryptology\n" + "Encrypt, decrypt, and hash files.\n\n"
 			+ "Created by: Paul Burrie, Jack Skelton, Zach Zenner\n\n"
 			+ "To encrypt a file, select the cleartext source file and select the destination\n"
@@ -38,9 +39,11 @@ public class BasicCryptGUI extends JFrame {
 			+ "where the decrypted file will be saved. Then click the 'decrypt' button.\n"
 			+ "You will be asked to enter the decryption key. After entering a valid key,\n"
 			+ "the file is decrypted and saved at the destination file location.\n\n"
+			+ "AES-128 with cipher block chaining and PKCS5 padding is used for encryption.\n\n"
 			+ "To calculate the hash value of a file, select the source file and\n"
-			+ "click the 'hash' button. The hash will be shown in the window.";
-
+			+ "click the 'hash' button. The hash will be shown in the window.\n\n"
+			+ "SHA-256 is the hashing algorithm used.";
+	private static final String DEFAULT_FILE_TEXT = "no file selected";
 	// Creates the file objects
 	public File destinationFile;
 	public File sourceFile;
@@ -75,9 +78,9 @@ public class BasicCryptGUI extends JFrame {
 	private boolean encrypt;
 
 	public BasicCryptGUI() {
-		super("Question Editor");
+		super("Cryptology");
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		setSize(500, 350);
+		setSize(600, 350);
 
 		addWindowListener(new WindowAdapter() {
 			@Override
@@ -97,18 +100,18 @@ public class BasicCryptGUI extends JFrame {
 	}
 
 	private void initComponents() {
-		sourceFileBtn = new JButton("Source Location");
-		destinationFileBtn = new JButton("Destination Location");
-		sourceFileField = new JTextField("Source File Path");
-		destinationFileField = new JTextField("Destination File Path");
-		hashFileBtn = new JButton("Hash File");
+		sourceFileBtn = new JButton("Choose Source File");
+		destinationFileBtn = new JButton("Choose Destination File");
+		sourceFileField = new JTextField(DEFAULT_FILE_TEXT);
+		destinationFileField = new JTextField(DEFAULT_FILE_TEXT);
+		hashFileBtn = new JButton("Hash File (SHA-256)");
 		hashResultField = new JTextField();
 		encryptBtn = new JButton("Encrypt");
 		decryptBtn = new JButton("Decrypt");
 		cancelBtn = new JButton("Cancel");
 		clearBtn = new JButton("Clear");
 		aboutBtn = new JButton("About");
-		statusLabel = new JLabel(" ");
+		statusLabel = new JLabel("Ready");
 		progressBar = new JProgressBar();
 
 		JPanel contentPane = new JPanel(new BorderLayout());
@@ -143,7 +146,7 @@ public class BasicCryptGUI extends JFrame {
 		decryptBtn.addActionListener((evt) -> doDecryptFile(evt));
 		cancelBtn.addActionListener((evt) -> doCancel(evt));
 		cancelBtn.setEnabled(false);
-		clearBtn.addActionListener((evt) -> doClearFiles(evt));
+		clearBtn.addActionListener((evt) -> doClear(evt));
 		aboutBtn.addActionListener((evt) -> doAbout(evt));
 
 		JPanel controlsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -185,32 +188,49 @@ public class BasicCryptGUI extends JFrame {
 			// if the user selected a file, save the file and display the
 			// filename
 			sourceFile = sourceLocation.getSelectedFile();
-			sourceFileField.setText(sourceFile.getName());
+			String sourceFileName = sourceFile.getName();
+			sourceFileField.setText(sourceFileName);
+			destLocation.setCurrentDirectory(sourceFile);
+			if (sourceFileName.toLowerCase().endsWith(".enc")) {
+				destLocation.setSelectedFile(new File(sourceFileName.substring(0, sourceFileName.length() - 4)));
+			} else {
+				destLocation.setSelectedFile(new File(sourceFileName + ".enc"));
+			}
+			clearDestination();
 		}
 	}
 
 	private void doChooseDestinationFile(ActionEvent evt) {
-		// Provides a value for the results of the dialogue box
-		int returnVal = destLocation.showSaveDialog(this);
-
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			// if the user selected a file, save the file and display the
-			// filename
-			destinationFile = destLocation.getSelectedFile();
-			destinationFileField.setText(destinationFile.getName());
+		if (sourceFile != null) {
+			// Provides a value for the results of the dialogue box
+			int returnVal = destLocation.showSaveDialog(this);
+	
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				// if the user selected a file, save the file and display the
+				// filename
+				destinationFile = destLocation.getSelectedFile();
+				destinationFileField.setText(destinationFile.getName());
+			}
+		} else {
+			JOptionPane.showMessageDialog(this, "Please select a source file first.");
 		}
 	}
-
-	private void doClearFiles(ActionEvent evt) {
-		// Resets text fields
-		destinationFileField.setText("Destination File Path");
-		sourceFileField.setText("Source File Path");
-		hashResultField.setText("");
-
-		// Resets File variables
+	
+	private void clearSource() {
 		sourceFile = null;
-		destinationFile = null;
+		sourceFileField.setText(DEFAULT_FILE_TEXT);
+	}
 
+	private void clearDestination() {
+		destinationFile = null;
+		destinationFileField.setText(DEFAULT_FILE_TEXT);
+	}
+
+	private void doClear(ActionEvent evt) {
+		clearSource();
+		clearDestination();
+		// clear hash text field
+		hashResultField.setText("");
 		// Reset progress bar
 		progressBar.setValue(0);
 		progressBar.setIndeterminate(false);
@@ -333,13 +353,13 @@ public class BasicCryptGUI extends JFrame {
 
 		@Override
 		public void onComplete() {
-			statusLabel.setText("The file has been " + (encrypt ? "encrypted" : "decrypted") + "!");
+			statusLabel.setText("\"" + sourceFile.getName() + "\" has been " + (encrypt ? "encrypted" : "decrypted") + " and saved at \"" + destinationFile.getName() + "\"");
 			cleanup();
 		}
 
 		@Override
 		public void onError(String message) {
-			statusLabel.setText("An error has occurred!");
+			statusLabel.setText("ERROR: " + message);
 			cleanup();
 		}
 	}
@@ -366,19 +386,18 @@ public class BasicCryptGUI extends JFrame {
 				if (hash != null) {
 					hashResultField.setText(DatatypeConverter.printHexBinary(hash));
 				} else {
-					// TODO: shouldn't happen in real operation
-					hashResultField.setText("testing");
+					hashResultField.setText("");
 				}
 			} catch (InterruptedException | ExecutionException e) {
 				statusLabel.setText("An error has occurred!");
 			}
-			statusLabel.setText("The file has been hashed!");
+			statusLabel.setText("The SHA-256 hash value of \"" + sourceFile.getName() + "\" has been calculated.");
 			cleanup();
 		}
 
 		@Override
 		public void onError(String message) {
-			statusLabel.setText("An error has occurred!");
+			statusLabel.setText("ERROR: " + message);
 			cleanup();
 		}
 	}
@@ -393,8 +412,8 @@ public class BasicCryptGUI extends JFrame {
 					break;
 				}
 			}
-		} catch (Exception ex) {
-			// TODO: show error dialog
+		} catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+			ex.printStackTrace();
 		}
 		// Display the GUI
 		new BasicCryptGUI();

@@ -36,7 +36,9 @@ public class HashController extends SwingWorker<byte[], Integer> {
 				setProgress(totalBytes * 100 / sourceFileSize);
 				a.update(buffer, 0, bytesRead);
 			}
-			digest = a.digest();
+			if (!isCancelled()) {
+				digest = a.digest();
+			}
 		}
 		return digest;
 	}

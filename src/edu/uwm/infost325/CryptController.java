@@ -6,14 +6,6 @@ import javax.crypto.*;
 import javax.crypto.spec.*;
 import javax.swing.SwingWorker;
 
-/**
- * Some of this functionality is based off work I did in my cyber security lab
- * in a previous semester, but it needed to be customized to fit the needs of
- * this project.
- * Also referenced: https://docs.oracle.com/javase/tutorial/uiswing/concurrency/worker.html
- * 
- * @author Paul Burrie
- */
 public class CryptController extends SwingWorker<Void, Integer> {
 	private File sourceFile;
 	private File destinationFile;
