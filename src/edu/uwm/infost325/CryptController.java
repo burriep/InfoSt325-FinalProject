@@ -12,7 +12,7 @@ public class CryptController extends SwingWorker<Void, Integer> {
 	private byte[] raw_key;
 	private boolean encrypt;
 	private WorkerReporter reporter;
-	private int sourceFileSize;
+//	private int sourceFileSize;
 	private boolean hadError;
 	private String errorMessage;
 
@@ -26,7 +26,7 @@ public class CryptController extends SwingWorker<Void, Integer> {
 
 	@Override
 	protected Void doInBackground() throws Exception {
-		sourceFileSize = (int) sourceFile.length();
+//		sourceFileSize = (int) sourceFile.length();
 		if (encrypt) {
 			encrypt(sourceFile, destinationFile);
 		} else {
@@ -119,11 +119,11 @@ public class CryptController extends SwingWorker<Void, Integer> {
 	private void crypt(InputStream fis, OutputStream fos, Cipher cipher)
 			throws FileNotFoundException, IOException, IllegalBlockSizeException, BadPaddingException {
 		byte[] buffer = new byte[512];
-		int totalBytesRead = 0;
+//		int totalBytesRead = 0;
 		int bytesRead = 0;
 		while (!isCancelled() && (bytesRead = fis.read(buffer)) > 0) {
-			totalBytesRead += bytesRead;
-			setProgress(totalBytesRead * 100 / sourceFileSize);
+//			totalBytesRead += bytesRead;
+//			setProgress(totalBytesRead * 100 / sourceFileSize);
 			byte[] ciphertext = cipher.update(buffer, 0, bytesRead);
 			if (ciphertext != null) {
 				fos.write(ciphertext);
@@ -134,7 +134,7 @@ public class CryptController extends SwingWorker<Void, Integer> {
 			if (ciphertext != null) {
 				fos.write(ciphertext);
 			}
-			setProgress(100);
+//			setProgress(100);
 		}
 	}
 }
