@@ -242,6 +242,7 @@ public class BasicCryptGUI extends JFrame {
 			encrypt = true;
 			disableButtons();
 			progressBar.setValue(0);
+			progressBar.setIndeterminate(true);
 			cryptController = new CryptController(sourceFile, destinationFile, key, true, cryptReporter);
 			cryptController.execute();
 			// update the progress bar
@@ -255,6 +256,7 @@ public class BasicCryptGUI extends JFrame {
 			encrypt = false;
 			disableButtons();
 			progressBar.setValue(0);
+			progressBar.setIndeterminate(true);
 			cryptController = new CryptController(sourceFile, destinationFile, key, false, cryptReporter);
 			cryptController.execute();
 			// update the progress bar
@@ -266,6 +268,7 @@ public class BasicCryptGUI extends JFrame {
 		if (sourceFile != null) {
 			disableButtons();
 			progressBar.setValue(0);
+			progressBar.setIndeterminate(true);
 			hashController = new HashController(sourceFile, hashReporter);
 			hashController.execute();
 			// update the progress bar
@@ -354,6 +357,8 @@ public class BasicCryptGUI extends JFrame {
 		@Override
 		public void onComplete() {
 			statusLabel.setText("\"" + sourceFile.getName() + "\" has been " + (encrypt ? "encrypted" : "decrypted") + " and saved at \"" + destinationFile.getName() + "\"");
+			progressBar.setValue(100);
+			progressBar.setIndeterminate(false);
 			cleanup();
 		}
 
@@ -384,6 +389,8 @@ public class BasicCryptGUI extends JFrame {
 			try {
 				byte[] hash = hashController.get();
 				if (hash != null) {
+					progressBar.setValue(100);
+					progressBar.setIndeterminate(false);
 					hashResultField.setText(DatatypeConverter.printHexBinary(hash));
 				} else {
 					hashResultField.setText("");
@@ -404,17 +411,17 @@ public class BasicCryptGUI extends JFrame {
 
 	public static void main(String args[]) {
 		/* Set the Nimbus look and feel */
-		try {
-			for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-				String name = info.getName();
-				if (name != null && name.equals("Nimbus")) {
-					UIManager.setLookAndFeel(info.getClassName());
-					break;
-				}
-			}
-		} catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-			ex.printStackTrace();
-		}
+//		try {
+//			for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+//				String name = info.getName();
+//				if (name != null && name.equals("Nimbus")) {
+//					UIManager.setLookAndFeel(info.getClassName());
+//					break;
+//				}
+//			}
+//		} catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+//			ex.printStackTrace();
+//		}
 		// Display the GUI
 		new BasicCryptGUI();
 	}
