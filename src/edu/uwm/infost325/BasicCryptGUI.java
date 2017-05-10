@@ -243,6 +243,7 @@ public class BasicCryptGUI extends JFrame {
 			disableButtons();
 			progressBar.setValue(0);
 			progressBar.setIndeterminate(true);
+			statusLabel.setText("Encrypting File");
 			cryptController = new CryptController(sourceFile, destinationFile, key, true, cryptReporter);
 			cryptController.execute();
 			// update the progress bar
@@ -257,6 +258,7 @@ public class BasicCryptGUI extends JFrame {
 			disableButtons();
 			progressBar.setValue(0);
 			progressBar.setIndeterminate(true);
+			statusLabel.setText("Decrypting File");
 			cryptController = new CryptController(sourceFile, destinationFile, key, false, cryptReporter);
 			cryptController.execute();
 			// update the progress bar
@@ -269,6 +271,7 @@ public class BasicCryptGUI extends JFrame {
 			disableButtons();
 			progressBar.setValue(0);
 			progressBar.setIndeterminate(true);
+			statusLabel.setText("Hashing File");
 			hashController = new HashController(sourceFile, hashReporter);
 			hashController.execute();
 			// update the progress bar
@@ -282,14 +285,14 @@ public class BasicCryptGUI extends JFrame {
 		progressBar.setIndeterminate(true);
 		if (cryptController != null) {
 			if (cryptController.cancel(true)) {
-				// cancelled successfully
+				statusLabel.setText("Process Cancelled");
 			} else {
 				// unable to cancel
 				statusLabel.setText("Unable to cancel the process...");
 			}
 		} else if (hashController != null) {
 			if (hashController.cancel(true)) {
-				// cancelled successfully
+				statusLabel.setText("Process Cancelled");
 			} else {
 				// unable to cancel
 				statusLabel.setText("Unable to cancel the process...");
